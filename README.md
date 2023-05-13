@@ -6,8 +6,7 @@
 [шаблон React-проекту](https://github.com/goitacademy/react-homework-template#readme)
 як стартову точку своєї програми.
 
-- Створені репозиторії `goit-react-hw-03-phonebook` і
-  `goit-react-hw-03-image-finder`
+- Створені репозиторії `goit-react-hw-04-images`
 - При здачі домашньої роботи є посилання: на вихідні файли та робочу сторінку
   проектів на `GitHub Pages`.
 - У стані компонентів зберігається мінімально необхідний набір даних, решта
