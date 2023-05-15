@@ -1,34 +1,34 @@
-import React, { Component } from 'react';
+import { useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { Overlay, ModalViewer, ModalImg } from './Modal.styled';
 
 const modalRoot = document.querySelector('#modal-root');
 
-export class Modal extends Component {
-  componentDidMount() {
-    window.addEventListener('keydown', this.closeByEsc);
-  }
+export function Modal({ closeModal, tags, modalImg }) {
+ 
+  useEffect(() => {
+    
+    
+    const closeByEsc = e => {
+      if (e.code === 'Escape') {
+        closeModal(); }        
+      };
 
-  componentWillUnmount() {
-    window.removeEventListener('keydown', this.closeByEsc);
-  }
+      window.addEventListener('keydown', closeByEsc);
 
-  closeByEsc = e => {
-    if (e.code === 'Escape') this.props.closeModal();
-  };
-
-  closeByBackdropClick = e => {
-    if (e.target === e.currentTarget) {
-      this.props.closeModal();
+      return () => window.removeEventListener('keydown', closeByEsc);
+    
+  }, [closeModal]);
+  
+    const closeByBackdropClick = e => {
+    if (e.currentTarget === e.target) {
+      closeModal();
     }
   };
 
-  render() {
-    const { tags, modalImg } = this.props;
-
     return createPortal(
-      <Overlay onClick={this.closeByBackdropClick}>
+      <Overlay onClick={closeByBackdropClick}>
         <ModalViewer>
           <ModalImg src={modalImg} alt={tags} />
         </ModalViewer>
@@ -36,7 +36,7 @@ export class Modal extends Component {
       modalRoot
     );
   }
-}
+
 
 Modal.propTypes = {
   modalImg: PropTypes.string.isRequired,

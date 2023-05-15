@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import { toast } from 'react-toastify';
@@ -8,68 +8,57 @@ import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './Button/Button';
 import { Loader } from './Loader/Loader';
 
-export class App extends Component {
-  state = {
-    query: '',
-    images: [],
-    page: 1,
-    totalHits: 0,
-    isLoading: false,
-  };
-
-  async componentDidUpdate(_, prevState) {
-    const { query, page } = this.state;
-
-    if (prevState.query !== query || prevState.page !== page) {
-      try {
-        this.setState({ isLoading: true });
-
-        const { totalHits, hits } = await fetchImages(query, page);
-
-        if (totalHits === 0) {
-          toast.error('Nothing was found for your request');
-          this.setState({ isLoading: false });
-          return;
-        }
-
-        this.setState(prevState => ({
-          images: page === 1 ? hits : [...prevState.images, ...hits],
-
-          totalHits:
-            page === 1
-              ? totalHits - hits.length
-              : totalHits - [...prevState.images, ...hits].length,
-        }));
-
-        this.setState({ isLoading: false });
-      } catch (error) {
-        toast.error(`Oops..! Something went wrong! ${error}`);
-      }
+export function App() {
+  const [query, setQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [totalHits, setTotalHits] = useState(0);
+  const [loading, setLoading] = useState(false);
+  useEffect(() => {
+    if (!query) {
+      return;
     }
-  }
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
+    setLoading(true);
+
+    const fetchData = async () => {
+      const { hits, totalHits } = await fetchImages(query, page);
+
+      if (totalHits === 0) {
+        toast.error('Sorry... Nothing was found on your request.');
+        setLoading(false);
+        return;
+      }
+
+      setImages(prevImages => (page === 1 ? hits : [...prevImages, ...hits]));
+      setTotalHits(prevTotalHits =>
+        page === 1 ? totalHits - hits.length : prevTotalHits - hits.length
+      );
+      setLoading(false);
+    };
+
+    fetchData().catch(error => {
+      toast.error(`Oops..! Something went wrong! ${error}`);
+      setLoading(false);
+    });
+  }, [page, query]);
+
+  const handleQuerySubmit = query => {
+    setQuery(query);
+    setPage(1);
   };
 
-  handleQuerySubmit = query => {
-    this.setState({ query, page: 1 });
+  const handleLoadMore = () => {
+    setPage(prevPage => prevPage + 1);
   };
 
-  render() {
-    const { images, totalHits, isLoading } = this.state;
-    const { handleQuerySubmit, handleLoadMore } = this;
-
-    return (
-      <>
-        <Searchbar onSubmit={handleQuerySubmit} prevQuery={this.state.query} />
-        {images && <ImageGallery images={images} />}
-        {!isLoading && !!totalHits && (
-          <Button onLoadMoreClick={handleLoadMore} />
-        )}
-        {isLoading && <Loader />}
-        <ToastContainer autoClose={2500} />
-      </>
-    );
-  }
+  return (
+    <>
+      <Searchbar onSubmit={handleQuerySubmit} prevQuery={query} />
+      {images && <ImageGallery images={images} />}
+      {!loading && !!totalHits && <Button onLoadMoreClick={handleLoadMore} />}
+      {loading && <Loader />}
+      <ToastContainer autoClose={2500} />
+    </>
+  );
 }
