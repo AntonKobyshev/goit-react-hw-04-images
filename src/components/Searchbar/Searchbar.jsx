@@ -48,4 +48,7 @@ export function Searchbar({ onSubmit, prevQuery }) {
   );
 }
 
-Searchbar.propTypes = { onSubmit: PropTypes.func.isRequired };
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+  prevQuery: PropTypes.string.isRequired,
+};
